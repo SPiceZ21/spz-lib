@@ -34,24 +34,24 @@ if IsDuplicityVersion() then
     end)
 
     -- Server-side Response Handler (Client -> Server Response for TriggerClient)
-    RegisterNetEvent("SPZ:callback:responseClient", function(requestId, result)
+    RegisterNetEvent("SPZ:callback:clientResponse", function(requestId, result)
         local src = source
         -- This will be handled by the server-side PendingRequests in shared/callbacks if we implement TriggerClient here.
         -- But TriggerClient is usually server-only, so we might put that logic in a server-only block.
     end)
 else
     -- Client-side Trigger Handler (Server -> Client)
-    RegisterNetEvent("SPZ:callback:triggerClient", function(name, requestId, data)
+    RegisterNetEvent("SPZ:callback:clientTrigger", function(name, requestId, data)
         local handler = Handlers[name]
 
         if not handler then
             print(("^1[ERROR] [spz-lib] Received unregistered client callback: %s^7"):format(name))
-            TriggerServerEvent("SPZ:callback:responseClient", requestId, nil)
+            TriggerServerEvent("SPZ:callback:clientResponse", requestId, nil)
             return
         end
 
         local function cb(result)
-            TriggerServerEvent("SPZ:callback:responseClient", requestId, result)
+            TriggerServerEvent("SPZ:callback:clientResponse", requestId, result)
         end
 
         handler(cb, data)
@@ -69,7 +69,7 @@ if IsDuplicityVersion() then
 
         PendingRequests[id] = cb
 
-        TriggerClientEvent("SPZ:callback:triggerClient", source, name, id, data)
+        TriggerClientEvent("SPZ:callback:clientTrigger", source, name, id, data)
 
         -- Timeout handling
         SetTimeout(Config.CallbackTimeout or 5000, function()
@@ -82,7 +82,7 @@ if IsDuplicityVersion() then
         end)
     end
 
-    RegisterNetEvent("SPZ:callback:responseClient", function(requestId, result)
+    RegisterNetEvent("SPZ:callback:clientResponse", function(requestId, result)
         local src = source
         local cb = PendingRequests[requestId]
 

@@ -25,6 +25,12 @@ end
 ---@param cb function
 ---@return number timerId
 function SPZ.Timer.Every(ms, cb)
+    local minInterval = Config.TimerMinInterval or 100
+    if ms < minInterval then
+        print(("^3[WARN] [spz-lib] Timer.Every called with %dms, clamping to %dms^7"):format(ms, minInterval))
+        ms = minInterval
+    end
+
     NextTimerId = NextTimerId + 1
     local id = NextTimerId
     ActiveTimers[id] = true

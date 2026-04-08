@@ -7,7 +7,7 @@ local function formatArg(v)
 end
 
 local function doLog(levelConst, levelName, moduleName, message, ...)
-    local minLevel = ModuleLogLevels[moduleName] or Config.MinLogLevel or 1
+    local minLevel = ModuleLogLevels[moduleName] or Config.LogLevel or 1
     if levelConst < minLevel then return end
 
     local args = {...}
@@ -39,7 +39,7 @@ end
 ---@param level number 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
 function SPZ.SetLogLevel(module, level)
     if module == "global" then
-        Config.MinLogLevel = level
+        Config.LogLevel = level
     else
         ModuleLogLevels[module] = level
     end

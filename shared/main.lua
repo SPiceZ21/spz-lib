@@ -16,6 +16,28 @@ SPZ.State = { IDLE = "IDLE", FREEROAM = "FREEROAM", QUEUED = "QUEUED", RACING = 
 SPZ.RaceState = { IDLE = "IDLE", POLLING = "POLLING", WAITING = "WAITING", COUNTDOWN = "COUNTDOWN", LIVE = "LIVE", ENDED = "ENDED", CLEANUP = "CLEANUP" }
 SPZ.LogLevel = { DEBUG = 0, INFO = 1, WARN = 2, ERROR = 3 }
 
+-- Reference Constants
+SPZ.PointsTable = {
+    [1]  = 25,
+    [2]  = 18,
+    [3]  = 15,
+    [4]  = 12,
+    [5]  = 10,
+    [6]  = 8,
+    [7]  = 6,
+    [8]  = 4,
+    [9]  = 2,
+    [10] = 1,
+}
+
+SPZ.SRChange = {
+    FINISH        =  0.10,
+    TOP3          =  0.20,
+    PERSONAL_BEST =  0.05,
+    DNF           = -0.50,
+    TIMEOUT       = -0.25,
+}
+
 -- Version Export
 function GetVersion()
     return "1.0.0"
