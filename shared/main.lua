@@ -1,4 +1,4 @@
-SPZ = {}
+SPZ = SPZ or {}
 
 -- Initialize namespaces
 SPZ.Callbacks = {}
@@ -43,4 +43,9 @@ function GetVersion()
     return "1.0.0"
 end
 
+function IsReady()
+    return true
+end
+
 exports("GetVersion", GetVersion)
+exports("isReady", IsReady)
