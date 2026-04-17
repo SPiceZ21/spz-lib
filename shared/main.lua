@@ -49,3 +49,6 @@ end
 
 exports("GetVersion", GetVersion)
 exports("isReady", IsReady)
+exports("GetCoreObject", function()
+    return SPZ
+end)
