@@ -38,11 +38,13 @@ end
 ---@param origin vector3
 ---@param heading number
 ---@param count number
+---@param rowSpacing number|nil
+---@param colSpacing number|nil
 ---@return table
-function SPZ.Math.GridPositions(origin, heading, count)
+function SPZ.Math.GridPositions(origin, heading, count, rowSpacing, colSpacing)
     local grid = {}
-    local rowSpacing = Config.GridRowSpacing or 10.0
-    local colSpacing = Config.GridColSpacing or 5.0
+    local rowSpacing = rowSpacing or (Config and Config.GridRowSpacing) or 10.0
+    local colSpacing = colSpacing or (Config and Config.GridColSpacing) or 5.0
 
     local rad = math.rad(heading)
     local forward = vec3(-math.sin(rad), math.cos(rad), 0.0)
