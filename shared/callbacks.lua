@@ -67,7 +67,8 @@ if IsDuplicityVersion() then
         RequestId = RequestId + 1
         local id = RequestId
 
-        PendingRequests[id] = cb
+        -- Store both the callback and the intended target to validate the responder
+        PendingRequests[id] = { cb = cb, target = source }
 
         TriggerClientEvent("SPZ:callback:clientTrigger", source, name, id, data)
 
@@ -75,20 +76,21 @@ if IsDuplicityVersion() then
         SetTimeout(Config.CallbackTimeout or 5000, function()
             if PendingRequests[id] then
                 print(("^3[WARN] [spz-lib] Client callback timed out: %s (Player: %s)^7"):format(name, source))
-                local callback = PendingRequests[id]
+                local req = PendingRequests[id]
                 PendingRequests[id] = nil
-                callback(nil)
+                req.cb(nil)
             end
         end)
     end
 
     RegisterNetEvent("SPZ:callback:clientResponse", function(requestId, result)
         local src = source
-        local cb = PendingRequests[requestId]
+        local req = PendingRequests[requestId]
 
-        if cb then
+        -- Validate: only the player we sent to may respond
+        if req and req.target == src then
             PendingRequests[requestId] = nil
-            cb(result)
+            req.cb(result)
         end
     end)
 end
