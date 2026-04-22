@@ -20,6 +20,21 @@ SPZ.Callbacks.RegisterClient = RegisterClient
 
 exports("RegisterServerCallback", Register)
 exports("RegisterClientCallback", RegisterClient)
+exports("RegisterCallback", Register) -- Alias for convenience
+
+if IsDuplicityVersion() then
+    exports("TriggerClientCallback", function(name, source, data, cb)
+        SPZ.Callbacks.TriggerClient(name, source, data, cb)
+    end)
+else
+    exports("TriggerServerCallback", function(name, data, cb)
+        SPZ.Callbacks.Trigger(name, data, cb)
+    end)
+    -- Legacy alias
+    exports("TriggerCallback", function(name, data, cb)
+        SPZ.Callbacks.Trigger(name, data, cb)
+    end)
+end
 
 -- Server-side Trigger Handler (Client -> Server)
 if IsDuplicityVersion() then
