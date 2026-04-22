@@ -77,3 +77,6 @@ else
         showClientNotify(message, type, duration)
     end)
 end
+
+exports("Notify", SPZ.Notify)
+exports("NotifyAll", SPZ.NotifyAll)
