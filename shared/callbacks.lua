@@ -3,16 +3,22 @@ SPZ.Callbacks.Handlers = {}
 ---Registers a named callback that can be triggered from the other side.
 ---@param name string
 ---@param fn function
-function SPZ.Callbacks.Register(name, fn)
+local function Register(name, fn)
     SPZ.Callbacks.Handlers[name] = fn
 end
 
 ---Alias for Register, used on client side.
 ---@param name string
 ---@param fn function
-function SPZ.Callbacks.RegisterClient(name, fn)
+local function RegisterClient(name, fn)
     SPZ.Callbacks.Handlers[name] = fn
 end
+
+SPZ.Callbacks.Register = Register
+SPZ.Callbacks.RegisterClient = RegisterClient
+
+exports("RegisterServerCallback", Register)
+exports("RegisterClientCallback", RegisterClient)
 
 -- Server-side Trigger Handler (Client -> Server)
 if IsDuplicityVersion() then
@@ -53,7 +59,12 @@ else
         TriggerServerEvent("SPZ:callback:trigger", name, id, data)
 
         -- Timeout handling
-        SetTimeout(Config.CallbackTimeout or 5000, function()
+        local timeout = 5000
+        if _G.Config and _G.Config.CallbackTimeout then
+            timeout = _G.Config.CallbackTimeout
+        end
+
+        SetTimeout(timeout, function()
             if PendingRequests[id] then
                 print(("^3[WARN] [spz-lib] Server callback timed out: %s^7"):format(name))
                 local callback = PendingRequests[id]

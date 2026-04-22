@@ -50,5 +50,15 @@ end
 exports("GetVersion", GetVersion)
 exports("isReady", IsReady)
 exports("GetCoreObject", function()
+    -- Ensure Register always uses the export to cross resource boundaries
+    if IsDuplicityVersion() then
+        SPZ.Callbacks.Register = function(name, cb)
+            exports["spz-lib"]:RegisterServerCallback(name, cb)
+        end
+    else
+        SPZ.Callbacks.Register = function(name, cb)
+            exports["spz-lib"]:RegisterClientCallback(name, cb)
+        end
+    end
     return SPZ
 end)
