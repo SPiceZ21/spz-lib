@@ -7,6 +7,7 @@ version '1.0.0'
 author 'SPiceZ-Core'
 
 shared_scripts {
+  'config.lua',
   'shared/main.lua',
   'shared/callbacks.lua',
   'shared/notify.lua',
