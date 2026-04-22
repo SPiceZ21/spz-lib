@@ -1,7 +1,7 @@
 local function showClientNotify(message, type, duration)
-    local backend = Config.NotifyBackend or "ox_lib"
+    local backend = (Config and Config.NotifyBackend) or "ox_lib"
     type = type or "info"
-    duration = duration or Config.NotifyDefaultDuration or 3000
+    duration = duration or (Config and Config.NotifyDefaultDuration) or 3000
 
     if backend == "ox_lib" then
         if lib and lib.notify then
