@@ -4,6 +4,7 @@ SPZ.Callbacks.Handlers = {}
 ---@param name string
 ---@param fn function
 local function Register(name, fn)
+    print("^2[spz-lib] Registering server callback: " .. name .. "^7")
     SPZ.Callbacks.Handlers[name] = fn
 end
 
@@ -27,7 +28,13 @@ if IsDuplicityVersion() then
         local handler = SPZ.Callbacks.Handlers[name]
 
         if not handler then
-            print(("^1[ERROR] [spz-lib] Received unregistered server callback: %s^7"):format(name))
+            print(("^1[ERROR] [spz-lib] Received unregistered server callback: %s (Check if resource providing it is started)^7"):format(name))
+            -- Debug: List all registered handlers
+            print("^3[spz-lib] Currently registered handlers:^7")
+            for k, _ in pairs(SPZ.Callbacks.Handlers) do
+                print("  - " .. k)
+            end
+            
             TriggerClientEvent("SPZ:callback:response", src, requestId, nil)
             return
         end
