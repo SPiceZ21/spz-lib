@@ -54,7 +54,7 @@
     var el = document.createElement('div');
     el.className  = 'spz-notif';
     el.dataset.id = id;
-    el.style.setProperty('--accent', color);
+    el.style.setProperty('--notif-color', color);
     el.innerHTML =
       '<div class="spz-notif__icon" style="color:' + (opts.iconColor || color) + '">' + icon + '</div>' +
       '<div class="spz-notif__body">' +
