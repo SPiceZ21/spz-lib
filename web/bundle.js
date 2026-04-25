@@ -879,9 +879,10 @@
       case 'spz:menu:hide':         menu.hide();                break;
       case 'spz:context:show':      context.show(data);         break;
       case 'spz:context:hide':      context.hide();             break;
-      case 'spz:radial:show':       radial.show(data);          break;
-      case 'spz:radial:hide':       radial.hide();              break;
-      case 'spz:radial:update':     radial.update(data);        break;
+      case 'spz:radial:show':        radial.show(data);                         break;
+      case 'spz:radial:hide':        radial.hide();                             break;
+      case 'spz:radial:update':      radial.update(data);                       break;
+      case 'spz:radial:registerSub': radial.registerSub(data.id, data.items);   break;
       case 'spz:skillcheck:start':  skillCheck.start(data);     break;
     }
   });
