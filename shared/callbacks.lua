@@ -38,35 +38,39 @@ end
 
 -- Server-side Trigger Handler (Client -> Server)
 if IsDuplicityVersion() then
-    RegisterNetEvent("SPZ:callback:trigger", function(name, requestId, data)
-        local src = source
-        local handler = SPZ.Callbacks.Handlers[name]
+    if GetCurrentResourceName() == "spz-lib" then
+        RegisterNetEvent("SPZ:callback:trigger", function(name, requestId, data)
+            local src = source
+            local handler = SPZ.Callbacks.Handlers[name]
 
-        if not handler then
-            print(("^1[ERROR] [spz-lib] Received unregistered server callback: %s (Check if resource providing it is started)^7"):format(name))
-            -- Debug: List all registered handlers
-            print("^3[spz-lib] Currently registered handlers:^7")
-            for k, _ in pairs(SPZ.Callbacks.Handlers) do
-                print("  - " .. k)
+            if not handler then
+                print(("^1[ERROR] [spz-lib] Received unregistered server callback: %s (Check if resource providing it is started)^7"):format(name))
+                -- Debug: List all registered handlers
+                print("^3[spz-lib] Currently registered handlers:^7")
+                for k, _ in pairs(SPZ.Callbacks.Handlers) do
+                    print("  - " .. k)
+                end
+                
+                TriggerClientEvent("SPZ:callback:response", src, requestId, nil)
+                return
             end
-            
-            TriggerClientEvent("SPZ:callback:response", src, requestId, nil)
-            return
-        end
 
-        local function cb(result)
-            TriggerClientEvent("SPZ:callback:response", src, requestId, result)
-        end
+            local function cb(result)
+                TriggerClientEvent("SPZ:callback:response", src, requestId, result)
+            end
 
-        handler(src, cb, data)
-    end)
+            handler(src, cb, data)
+        end)
+    end
 
     -- Server-side Response Handler (Client -> Server Response for TriggerClient)
-    RegisterNetEvent("SPZ:callback:clientResponse", function(requestId, result)
-        local src = source
-        -- This will be handled by the server-side PendingRequests in shared/callbacks if we implement TriggerClient here.
-        -- But TriggerClient is usually server-only, so we might put that logic in a server-only block.
-    end)
+    if GetCurrentResourceName() == "spz-lib" then
+        RegisterNetEvent("SPZ:callback:clientResponse", function(requestId, result)
+            local src = source
+            -- This will be handled by the server-side PendingRequests in shared/callbacks if we implement TriggerClient here.
+            -- But TriggerClient is usually server-only, so we might put that logic in a server-only block.
+        end)
+    end
 else
     -- Implementation for Trigger (Client -> Server)
     local PendingRequests = {}
@@ -96,30 +100,34 @@ else
         end)
     end
 
-    RegisterNetEvent("SPZ:callback:response", function(requestId, result)
-        local cb = PendingRequests[requestId]
-        if cb then
-            PendingRequests[requestId] = nil
-            cb(result)
-        end
-    end)
+    if GetCurrentResourceName() == "spz-lib" then
+        RegisterNetEvent("SPZ:callback:response", function(requestId, result)
+            local cb = PendingRequests[requestId]
+            if cb then
+                PendingRequests[requestId] = nil
+                cb(result)
+            end
+        end)
+    end
 
     -- Client-side Trigger Handler (Server -> Client)
-    RegisterNetEvent("SPZ:callback:clientTrigger", function(name, requestId, data)
-        local handler = SPZ.Callbacks.Handlers[name]
+    if GetCurrentResourceName() == "spz-lib" then
+        RegisterNetEvent("SPZ:callback:clientTrigger", function(name, requestId, data)
+            local handler = SPZ.Callbacks.Handlers[name]
 
-        if not handler then
-            print(("^1[ERROR] [spz-lib] Received unregistered client callback: %s^7"):format(name))
-            TriggerServerEvent("SPZ:callback:clientResponse", requestId, nil)
-            return
-        end
+            if not handler then
+                print(("^1[ERROR] [spz-lib] Received unregistered client callback: %s^7"):format(name))
+                TriggerServerEvent("SPZ:callback:clientResponse", requestId, nil)
+                return
+            end
 
-        local function cb(result)
-            TriggerServerEvent("SPZ:callback:clientResponse", requestId, result)
-        end
+            local function cb(result)
+                TriggerServerEvent("SPZ:callback:clientResponse", requestId, result)
+            end
 
-        handler(cb, data)
-    end)
+            handler(cb, data)
+        end)
+    end
 end
 
 -- Implementation for TriggerClient (Server -> Client)
@@ -147,14 +155,16 @@ if IsDuplicityVersion() then
         end)
     end
 
-    RegisterNetEvent("SPZ:callback:clientResponse", function(requestId, result)
-        local src = source
-        local req = PendingRequests[requestId]
+    if GetCurrentResourceName() == "spz-lib" then
+        RegisterNetEvent("SPZ:callback:clientResponse", function(requestId, result)
+            local src = source
+            local req = PendingRequests[requestId]
 
-        -- Validate: only the player we sent to may respond
-        if req and req.target == src then
-            PendingRequests[requestId] = nil
-            req.cb(result)
-        end
-    end)
+            -- Validate: only the player we sent to may respond
+            if req and req.target == src then
+                PendingRequests[requestId] = nil
+                req.cb(result)
+            end
+        end)
+    end
 end

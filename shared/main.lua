@@ -55,10 +55,12 @@ exports("GetCoreObject", function()
         SPZ.Callbacks.Register = function(name, cb)
             exports["spz-lib"]:RegisterServerCallback(name, cb)
         end
+        SPZ.Callbacks.RegisterServer = SPZ.Callbacks.Register
     else
         SPZ.Callbacks.Register = function(name, cb)
             exports["spz-lib"]:RegisterClientCallback(name, cb)
         end
+        SPZ.Callbacks.RegisterClient = SPZ.Callbacks.Register
     end
     return SPZ
 end)
