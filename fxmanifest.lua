@@ -3,7 +3,7 @@ game 'gta5'
 
 name 'spz-lib'
 description 'SPiceZ-Core — Shared utility library'
-version '1.0.0'
+version '1.2.9'
 author 'SPiceZ-Core'
 
 -- NUI page (UI branch)
