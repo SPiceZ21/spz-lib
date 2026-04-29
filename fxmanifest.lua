@@ -40,6 +40,7 @@ client_scripts {
   'client/ui/skillcheck.lua',
   -- Core client utilities
   'client/callbacks.lua',
+  'client/interaction.lua',
 }
 
 dependencies {
