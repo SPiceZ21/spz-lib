@@ -396,4 +396,78 @@ Object.assign(window, {
   DropdownMenu, MenuItem, MenuLabel, MenuDivider,
   Table, Tooltip, TelemetryTile, LapRow,
   ToastProvider, useToast, Toast, KbdGroup, Keycap,
+  RadialMenu,
 });
+
+/* ---------- Radial Menu (Honeycomb) ---------- */
+function RadialMenu({ isOpen, items = [], onClose }) {
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => { if (e.key === 'Escape' && isOpen) onClose?.(); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  const menuItems = useMemo(() => {
+    const hexWidth = 100;
+    const hexHeight = 115;
+    const horizontalSpacing = hexWidth + 8;
+    const verticalSpacing = (hexHeight * 0.75) + 8;
+
+    const rows = [];
+    let currentItems = [...items];
+    let rowSize = 4;
+    while (currentItems.length > 0) {
+      rows.push(currentItems.splice(0, rowSize));
+      rowSize = rowSize === 4 ? 3 : 4;
+    }
+
+    const positionedItems = [];
+    rows.forEach((row, rowIndex) => {
+      const totalWidth = (row.length - 1) * horizontalSpacing;
+      const startX = -totalWidth / 2;
+      row.forEach((item, itemIndex) => {
+        positionedItems.push({
+          ...item,
+          tx: `${startX + (itemIndex * horizontalSpacing)}px`,
+          ty: `${rowIndex * verticalSpacing - ((rows.length - 1) * verticalSpacing) / 2}px`,
+        });
+      });
+    });
+
+    return { items: positionedItems, totalHeight: (rows.length - 1) * verticalSpacing };
+  }, [items]);
+
+  return (
+    <div className={`spz-radial-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
+      <div className="spz-radial-container" onClick={(e) => e.stopPropagation()}>
+        {menuItems.items.map((item) => (
+          <div
+            key={item.id}
+            className={`spz-radial-item ${activeIndex === item.id ? 'active' : ''} ${item.disabled ? 'disabled' : ''}`}
+            style={{ '--tx': item.tx, '--ty': item.ty }}
+            onMouseEnter={() => !item.disabled && setActiveIndex(item.id)}
+            onMouseLeave={() => setActiveIndex(null)}
+            onClick={() => { if (!item.disabled) { item.action?.(); onClose?.(); } }}
+          >
+            <div className="spz-radial-item-hex" />
+            <div className="spz-radial-item-content">
+              <Icon name={item.icon || 'circle'} size={32} />
+              <span className="spz-radial-item-label">{item.label}</span>
+            </div>
+          </div>
+        ))}
+
+        <div
+          className="spz-radial-close"
+          style={{ '--ty': `${(menuItems.totalHeight / 2) + 90}px` }}
+          onClick={onClose}
+        >
+          <Icon name="x" size={18} />
+          <span>Close</span>
+        </div>
+      </div>
+    </div>
+  );
+}

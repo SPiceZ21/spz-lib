@@ -5,7 +5,7 @@
 <br/>
 
 # spz-lib
-> Shared utility library · `v1.2.9`
+> Shared utility library · `v1.3.0`
 
 ## Scripts
 

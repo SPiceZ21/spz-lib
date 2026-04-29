@@ -710,76 +710,98 @@ select.spz-input option{background:var(--surface);color:var(--fg)}
 /* ╔══════════════════════════════════════════════════════════════════════════╗
    ║  RADIAL                                                                  ║
    ╚══════════════════════════════════════════════════════════════════════════╝ */
-#spz-radial{
-  align-items:center;
-  backdrop-filter:blur(4px);
-  background:rgba(9,9,11,.45);
-  display:none;
-  inset:0;
-  justify-content:center;
-  position:fixed;
-  z-index:9200;
+/* ╔══════════════════════════════════════════════════════════════════════════╗
+   ║  RADIAL (Honeycomb)                                                      ║
+   ╚══════════════════════════════════════════════════════════════════════════╝ */
+.spz-radial-overlay {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  z-index: 9200;
+  opacity: 0; pointer-events: none;
+  transition: opacity 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-#spz-radial.spz-radial--visible{display:flex}
+.spz-radial-overlay.open { opacity: 1; pointer-events: auto; }
 
-.spz-radial__hub{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:50%;
-  color:var(--accent);
-  display:grid;
-  font-size:18px;
-  height:50px;
-  place-items:center;
-  position:absolute;
-  width:50px;
+.spz-radial-container { position: relative; width: 0; height: 0; }
+
+.spz-radial-item {
+  position: absolute;
+  width: 100px; height: 115px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate(-50%, -50%) scale(0.85);
+  opacity: 0;
+  user-select: none;
+}
+.spz-radial-overlay.open .spz-radial-item {
+  opacity: 1;
+  transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1);
+}
+.spz-radial-item:hover {
+  transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.06);
+  z-index: 10;
 }
 
-.spz-radial__item{
-  cursor:pointer;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:5px;
-  left:50%;
-  position:absolute;
-  top:50%;
-  transition:transform var(--dur) var(--ease);
-  width:76px;
+.spz-radial-item-hex {
+  position: absolute; inset: 0;
+  background: rgba(14, 16, 20, 0.9);
+  border: 1px solid var(--spz-line);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  transition: background 200ms, border-color 200ms;
 }
-.spz-radial__item--disabled{cursor:not-allowed;opacity:.38}
+.spz-radial-item:hover .spz-radial-item-hex {
+  background: var(--spz-orange);
+  border-color: var(--spz-orange);
+}
+.spz-radial-item.active .spz-radial-item-hex {
+  background: var(--spz-orange);
+  border-color: var(--spz-orange);
+}
 
-.spz-radial__icon{
-  align-items:center;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:50%;
-  display:flex;
-  font-size:17px;
-  height:42px;
-  justify-content:center;
-  transition:background var(--dur),border-color var(--dur),transform var(--dur);
-  width:42px;
+.spz-radial-item-content {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--spz-fg-2);
+  transition: color 200ms;
 }
-.spz-radial__item--active .spz-radial__icon{
-  background:var(--accent);
-  border-color:var(--accent);
-  color:#fff;
-  transform:scale(1.08);
+.spz-radial-item:hover .spz-radial-item-content,
+.spz-radial-item.active .spz-radial-item-content {
+  color: #000;
 }
-.spz-radial__label{
-  color:rgba(255,255,255,.75);
-  font-size:10px;
-  font-weight:400;
-  letter-spacing:.04em;
-  max-width:72px;
-  overflow:hidden;
-  text-align:center;
-  text-overflow:ellipsis;
-  text-transform:uppercase;
-  white-space:nowrap;
+
+.spz-radial-item-label {
+  font-family: var(--spz-font-mono);
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  text-align: center; max-width: 80px;
 }
-.spz-radial__item--active .spz-radial__label{color:var(--fg)}
+
+.spz-radial-close {
+  position: absolute;
+  padding: 8px 20px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 9999px;
+  display: flex; align-items: center; gap: 8px;
+  color: #ef4444; font-family: var(--spz-font-mono); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 200ms var(--ease-snap);
+  transform: translate(-50%, calc(-50% + var(--ty))) scale(0.9);
+  opacity: 0;
+  backdrop-filter: blur(4px);
+}
+.spz-radial-overlay.open .spz-radial-close {
+  opacity: 1;
+  transform: translate(-50%, calc(-50% + var(--ty))) scale(1);
+}
+.spz-radial-close:hover {
+  background: #ef4444; color: #fff;
+  transform: translate(-50%, calc(-50% + var(--ty))) scale(1.05);
+}
 
 
 
@@ -842,6 +864,17 @@ select.spz-input option{background:var(--surface);color:var(--fg)}
 <div id="spz-radial"></div>
 <div id="spz-skillcheck"></div>
 
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/preact@10.19.2/dist/preact.min.js"></script>
+<script src="https://unpkg.com/preact@10.19.2/hooks/dist/hooks.umd.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  window.preact = preact;
+  window.preactHooks = preactHooks;
+  window.html = htm.bind(preact.h);
+</script>
+<script src="components.jsx" type="text/babel"></script>
 <script src="bundle.js"></script>
 </body>
 </html>

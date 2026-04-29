@@ -3,7 +3,7 @@ game 'gta5'
 
 name 'spz-lib'
 description 'SPiceZ-Core — Shared utility library'
-version '1.2.9'
+version '1.3.0'
 author 'SPiceZ-Core'
 
 -- NUI page (UI branch)
@@ -11,6 +11,7 @@ ui_page 'web/index.html'
 
 files {
   'web/index.html',
+  'web/components.jsx',
   'web/bundle.js',
 }
 

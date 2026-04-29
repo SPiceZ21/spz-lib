@@ -9,7 +9,7 @@ lib = lib or {}
 
 -- Version guard
 lib.name    = 'spz-lib'
-lib.version = '1.0.0'
+lib.version = '1.3.0'
 
 -- ── Convenience: print with resource prefix ──────────────────────────────────
 function lib.print(...)
