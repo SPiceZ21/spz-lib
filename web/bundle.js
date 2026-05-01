@@ -610,99 +610,203 @@
   };
 
   // ── Radial ────────────────────────────────────────────────────────────────────
-  var ITEM_RADIUS = 115;
-
   function Radial() {
-    this.isOpen = false;
-    this.el = document.getElementById('spz-radial');
+    this.el       = document.getElementById('spz-radial');
+    this.isOpen   = false;
+    this.items    = [];
+    this.stack    = [];
+    this.registry = new Map();
+    this._render();
   }
 
+  Radial.prototype.registerSub = function (id, items) {
+    this.registry.set(id, items);
+  };
+
   Radial.prototype.show = function (opts) {
+    this.stack  = [];
+    this.items  = opts.items;
     this.isOpen = true;
-    this._render(opts.items);
+    this._render();
+  };
+
+  Radial.prototype.update = function (opts) {
+    this.items = opts.items;
+    this._render();
   };
 
   Radial.prototype.hide = function () {
     this.isOpen = false;
-    this._render([]);
+    this._render();
   };
 
-  Radial.prototype._render = function (items) {
+  Radial.prototype._handleSelect = function (id) {
+    fetchNUI('spz:radial:select', { id: id });
+    this.hide();
+  };
+
+  Radial.prototype._handleClose = function () {
+    if (this.stack.length > 0) {
+      this.items = this.stack.pop();
+      this._render();
+    } else {
+      fetchNUI('spz:radial:close', {});
+      this.hide();
+    }
+  };
+
+  Radial.prototype._render = function () {
     var self = this;
     if (!window.RadialMenu) return;
+
+    var mappedItems = this.items.map(function (item) {
+      return Object.assign({}, item, {
+        action: function () {
+          if (item.menu) {
+            var sub = self.registry.get(item.menu);
+            if (sub) {
+              self.stack.push(self.items);
+              self.items = sub;
+              self._render();
+              return;
+            }
+          }
+          self._handleSelect(item.id);
+        },
+      });
+    });
+
     preact.render(
       preact.h(window.RadialMenu, {
-        isOpen: this.isOpen,
-        items: items || [],
-        onClose: function() { self.hide(); }
+        isOpen:  this.isOpen,
+        items:   mappedItems,
+        onClose: function () { self._handleClose(); },
       }),
       this.el
     );
   };
 
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && self.el.classList.contains('spz-radial--visible')) {
-        if (self.stack.length) {
-          self._setItems(self.stack.pop());
-        } else {
-          fetchNUI('spz:radial:close', {});
-          self.hide();
-        }
-      }
-    });
+  // ── RadiMenu ──────────────────────────────────────────────────────────────────
+  function RadiMenu() {
+    this.el       = document.getElementById('spz-radimenu');
+    this.isOpen   = false;
+    this.items    = [];
+    this.stack    = [];
+    this.registry = new Map();
+    this._render();
   }
 
-  Radial.prototype.registerSub = function (id, items) { this.reg.set(id, items); };
-
-  Radial.prototype.show = function (opts) {
-    this.stack = [];
-    this._setItems(opts.items);
-    this.el.classList.add('spz-radial--visible');
+  RadiMenu.prototype.registerSub = function (id, items) {
+    this.registry.set(id, items);
   };
 
-  Radial.prototype.update = function (opts) { this._setItems(opts.items); };
-
-  Radial.prototype._setItems = function (items) {
-    this.items   = items;
-    this.hovered = -1;
+  RadiMenu.prototype.show = function (opts) {
+    this.stack  = [];
+    this.items  = opts.items;
+    this.isOpen = true;
     this._render();
   };
 
-  Radial.prototype._render = function () {
-    var self = this;
-    var n    = this.items.length;
-    var step = 360 / n;
+  RadiMenu.prototype.update = function (opts) {
+    this.items = opts.items;
+    this._render();
+  };
 
-    var itemsHTML = this.items.map(function (item, i) {
-      var angle    = step * i - 90;
-      var rad      = angle * Math.PI / 180;
-      var x        = ITEM_RADIUS * Math.cos(rad);
-      var y        = ITEM_RADIUS * Math.sin(rad);
-      var isActive = i === self.hovered;
-      return '<div class="spz-radial__item' + (isActive ? ' spz-radial__item--active' : '') + (item.disabled ? ' spz-radial__item--disabled' : '') + '"' +
-        ' style="transform:translate(calc(-50% + ' + x + 'px), calc(-50% + ' + y + 'px))">' +
-        '<div class="spz-radial__icon">' + (item.icon || '●') + '</div>' +
-        '<div class="spz-radial__label">' + item.label + '</div>' +
-        '</div>';
+  RadiMenu.prototype.hide = function () {
+    this.isOpen = false;
+    this._render();
+  };
+
+  RadiMenu.prototype._handleSelect = function (id) {
+    fetchNUI('spz:radimenu:select', { id: id });
+    this.hide();
+  };
+
+  RadiMenu.prototype._handleClose = function () {
+    if (this.stack.length > 0) {
+      this.items = this.stack.pop();
+      this._render();
+    } else {
+      fetchNUI('spz:radimenu:close', {});
+      this.hide();
+    }
+  };
+
+  RadiMenu.prototype._render = function () {
+    var self = this;
+    if (!window.RadialMenu) return;
+
+    var mappedItems = this.items.map(function (item) {
+      return Object.assign({}, item, {
+        action: function () {
+          if (item.menu) {
+            var sub = self.registry.get(item.menu);
+            if (sub) {
+              self.stack.push(self.items);
+              self.items = sub;
+              self._render();
+              return;
+            }
+          }
+          self._handleSelect(item.id);
+        },
+      });
     });
 
-    this.el.innerHTML =
-      '<div class="spz-radial__hub">' + (this.stack.length ? '‹' : '●') + '</div>' +
-      itemsHTML.join('');
+    preact.render(
+      preact.h(window.RadialMenu, {
+        isOpen:  this.isOpen,
+        items:   mappedItems,
+        onClose: function () { self._handleClose(); },
+      }),
+      this.el
+    );
   };
 
-  Radial.prototype._setHovered = function (idx) {
-    if (idx === this.hovered) return;
-    this.hovered = idx;
+  // ── Third Eye ─────────────────────────────────────────────────────────────────
+  function Third() {
+    this.el      = document.getElementById('spz-third');
+    this.visible = false;
+    this.isOpen  = false;
+    this.options = [];
+    this._render();
+  }
+
+  Third.prototype.show = function (opts) {
+    this.options = opts.options;
+    this.visible = true;
+    this.isOpen  = false;
     this._render();
   };
 
-  Radial.prototype.hide = function () {
-    this.el.classList.remove('spz-radial--visible');
-    this.items   = [];
-    this.stack   = [];
-    this.hovered = -1;
-    this.el.innerHTML = '';
+  Third.prototype.hide = function () {
+    this.visible = false;
+    this.isOpen  = false;
+    this._render();
+  };
+
+  Third.prototype._render = function () {
+    var self = this;
+    if (!window.ThirdEye) return;
+
+    var mappedOptions = this.options.map(function (opt) {
+      return Object.assign({}, opt, {
+        action: function () {
+          fetchNUI('spz:third:select', { id: opt.id });
+          self.hide();
+        },
+      });
+    });
+
+    preact.render(
+      preact.h(window.ThirdEye, {
+        visible:  this.visible,
+        isOpen:   this.isOpen,
+        options:  mappedOptions,
+        onToggle: function (state) { self.isOpen = state; self._render(); },
+      }),
+      this.el
+    );
   };
 
   // ── SkillCheck ────────────────────────────────────────────────────────────────
@@ -848,6 +952,8 @@
   var menu          = new Menu();
   var context       = new Context();
   var radial        = new Radial();
+  var radiMenu      = new RadiMenu();
+  var third         = new Third();
   var skillCheck    = new SkillCheck();
 
   window.addEventListener('message', function (ev) {
@@ -869,11 +975,17 @@
       case 'spz:menu:hide':         menu.hide();                break;
       case 'spz:context:show':      context.show(data);         break;
       case 'spz:context:hide':      context.hide();             break;
-      case 'spz:radial:show':        radial.show(data);                         break;
-      case 'spz:radial:hide':        radial.hide();                             break;
-      case 'spz:radial:update':      radial.update(data);                       break;
-      case 'spz:radial:registerSub': radial.registerSub(data.id, data.items);   break;
-      case 'spz:skillcheck:start':  skillCheck.start(data);     break;
+      case 'spz:radial:show':          radial.show(data);                           break;
+      case 'spz:radial:hide':          radial.hide();                               break;
+      case 'spz:radial:update':        radial.update(data);                         break;
+      case 'spz:radial:registerSub':   radial.registerSub(data.id, data.items);     break;
+      case 'spz:radimenu:show':        radiMenu.show(data);                         break;
+      case 'spz:radimenu:hide':        radiMenu.hide();                             break;
+      case 'spz:radimenu:update':      radiMenu.update(data);                       break;
+      case 'spz:radimenu:registerSub': radiMenu.registerSub(data.id, data.items);   break;
+      case 'spz:third:show':           third.show(data);                            break;
+      case 'spz:third:hide':           third.hide();                                break;
+      case 'spz:skillcheck:start':     skillCheck.start(data);                      break;
     }
   });
 
