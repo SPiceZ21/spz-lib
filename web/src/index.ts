@@ -11,6 +11,8 @@ import { Dialog }        from './dialog';
 import { Menu }          from './menu';
 import { Context }       from './context';
 import { Radial }        from './radial';
+import { RadiMenu }      from './radimenu';
+import { Third }         from './third';
 import { SkillCheck }    from './skillcheck';
 
 export const fetchNUI = (event: string, data?: unknown): Promise<Response> =>
@@ -31,6 +33,8 @@ const dialog        = new Dialog();
 const menu          = new Menu();
 const context       = new Context();
 const radial        = new Radial();
+const radiMenu      = new RadiMenu();
+const third         = new Third();
 const skillCheck    = new SkillCheck();
 
 // ── Message router ────────────────────────────────────────────────────────────
@@ -101,6 +105,25 @@ window.addEventListener('message', (ev: MessageEvent) => {
       break;
     case 'spz:radial:update':
       radial.update(data as Parameters<Radial['update']>[0]);
+      break;
+
+    // RadiMenu
+    case 'spz:radimenu:show':
+      radiMenu.show(data as Parameters<RadiMenu['show']>[0]);
+      break;
+    case 'spz:radimenu:hide':
+      radiMenu.hide();
+      break;
+    case 'spz:radimenu:update':
+      radiMenu.update(data as Parameters<RadiMenu['update']>[0]);
+      break;
+
+    // Third Eye
+    case 'spz:third:show':
+      third.show(data as Parameters<Third['show']>[0]);
+      break;
+    case 'spz:third:hide':
+      third.hide();
       break;
 
     // SkillCheck

@@ -32,6 +32,7 @@ end
 
 -- Handle item selection
 AddEventHandler('spz:radial:itemSelected', function(id)
+    print("[DEBUG] Radial item selected:", id)
     if id == 'car_spawn' then
         TriggerEvent('SPZ:carspawner:openMenu')
     elseif id == 'join_race' then
@@ -39,23 +40,13 @@ AddEventHandler('spz:radial:itemSelected', function(id)
     elseif id == 'leave_race' then
         TriggerServerEvent('SPZ:leaveQueue')
     elseif id == 'leaderboard' then
-        TriggerServerEvent('SPZ:leaderboard:request')
+        Citizen.CreateThread(function()
+            Citizen.Wait(500) -- Wait for radial focus to release
+            TriggerServerEvent('SPZ:leaderboard:request')
+        end)
     end
 end)
 
--- Key listener for Radial Menu
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(0)
-        -- Default to 'Z' key (20 / 48 depending on layout, but 20 is Z in most GTA mappings)
-        -- We'll use RegisterKeyMapping for better user control if possible
-        if IsControlJustReleased(0, 20) then -- Z
-            if not IsPauseMenuActive() then
-                openRaceRadial()
-            end
-        end
-    end
-end)
 
 -- Alternatively, register a command so players can bind it
 RegisterCommand('radial', function()

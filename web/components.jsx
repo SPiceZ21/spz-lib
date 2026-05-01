@@ -1,6 +1,9 @@
 /** @jsx h */
-const { h, Fragment, createContext } = preact;
-const { useState, useRef, useEffect, useCallback, useMemo, useContext } = preactHooks;
+const { useState, useEffect, useMemo, useCallback, useRef } = window.preactHooks || {};
+const h = window.h || window.preact?.h;
+
+const { Fragment, createContext, h: preactH } = preact;
+const { useContext } = preactHooks;
 
 /* ---------- Icon (Lucide via global) ---------- */
 function Icon({ name, size = 14, strokeWidth = 1.75, ...rest }) {
@@ -388,17 +391,6 @@ function LapRow({ lap, time, sectors, status }) {
   );
 }
 
-Object.assign(window, {
-  Icon, Button, Input, Textarea, Select, Field,
-  Card, CardHeader,
-  Badge, Kbd, Switch, Checkbox, RadioGroup, Slider, Progress,
-  Tabs, Segment, Avatar, Live, Alert, Breadcrumb,
-  DropdownMenu, MenuItem, MenuLabel, MenuDivider,
-  Table, Tooltip, TelemetryTile, LapRow,
-  ToastProvider, useToast, Toast, KbdGroup, Keycap,
-  RadialMenu,
-});
-
 /* ---------- Radial Menu (Honeycomb) ---------- */
 function RadialMenu({ isOpen, items = [], onClose }) {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -471,3 +463,61 @@ function RadialMenu({ isOpen, items = [], onClose }) {
     </div>
   );
 }
+
+/* ---------- Third Eye ---------- */
+function ThirdEye({ visible, isOpen, options = [], onToggle }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        if (isOpen) onToggle?.(false);
+      }
+    };
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onToggle]);
+
+  return (
+    <div
+      ref={containerRef}
+      className={`spz-third-container${visible ? ' visible' : ''}${isOpen ? ' open' : ''}`}
+    >
+      <div
+        className={`spz-third-icon${visible ? ' visible' : ''}${isOpen ? ' open' : ''}`}
+        onClick={() => onToggle?.(!isOpen)}
+      >
+        <Icon name="eye" size={24} />
+        <div className="spz-third-dot" />
+      </div>
+
+      <div className={`spz-third-menu${isOpen ? ' open' : ''}`}>
+        {options.map((opt) => (
+          <div
+            key={opt.id}
+            className={`spz-third-option${opt.disabled ? ' disabled' : ''}`}
+            onClick={() => {
+              if (opt.disabled) return;
+              opt.action?.();
+              onToggle?.(false);
+            }}
+          >
+            <Icon name={opt.icon || 'circle'} size={18} className="spz-third-option-icon" />
+            <span>{opt.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  Icon, Button, Input, Textarea, Select, Field,
+  Card, CardHeader,
+  Badge, Kbd, Switch, Checkbox, RadioGroup, Slider, Progress,
+  Tabs, Segment, Avatar, Live, Alert, Breadcrumb,
+  DropdownMenu, MenuItem, MenuLabel, MenuDivider,
+  Table, Tooltip, TelemetryTile, LapRow,
+  ToastProvider, useToast, Toast, KbdGroup, Keycap,
+  RadialMenu, ThirdEye,
+});

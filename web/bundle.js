@@ -613,42 +613,32 @@
   var ITEM_RADIUS = 115;
 
   function Radial() {
-    var self     = this;
-    this.el      = document.getElementById('spz-radial');
-    this.items   = [];
-    this.hovered = -1;
-    this.stack   = [];
-    this.reg     = new Map();
+    this.isOpen = false;
+    this.el = document.getElementById('spz-radial');
+  }
 
-    this.el.addEventListener('mousemove', function (e) {
-      var rect  = self.el.getBoundingClientRect();
-      var cx    = rect.width  / 2;
-      var cy    = rect.height / 2;
-      var dx    = e.clientX - rect.left - cx;
-      var dy    = e.clientY - rect.top  - cy;
-      var dist  = Math.sqrt(dx * dx + dy * dy);
+  Radial.prototype.show = function (opts) {
+    this.isOpen = true;
+    this._render(opts.items);
+  };
 
-      if (dist < 32) { self._setHovered(-1); return; }
+  Radial.prototype.hide = function () {
+    this.isOpen = false;
+    this._render([]);
+  };
 
-      var angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-      if (angle < 0) angle += 360;
-
-      var step = 360 / self.items.length;
-      var idx  = Math.round(angle / step) % self.items.length;
-      self._setHovered(idx);
-    });
-
-    this.el.addEventListener('click', function () {
-      if (self.hovered < 0) return;
-      var item = self.items[self.hovered];
-      if (!item || item.disabled) return;
-      if (item.menu) {
-        var sub = self.reg.get(item.menu);
-        if (sub) { self.stack.push(self.items); self._setItems(sub); return; }
-      }
-      fetchNUI('spz:radial:select', { id: item.id });
-      self.hide();
-    });
+  Radial.prototype._render = function (items) {
+    var self = this;
+    if (!window.RadialMenu) return;
+    preact.render(
+      preact.h(window.RadialMenu, {
+        isOpen: this.isOpen,
+        items: items || [],
+        onClose: function() { self.hide(); }
+      }),
+      this.el
+    );
+  };
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && self.el.classList.contains('spz-radial--visible')) {
